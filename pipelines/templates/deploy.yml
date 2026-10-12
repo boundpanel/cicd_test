@@ -1,0 +1,41 @@
+parameters:
+  - name: environment
+    type: string
+  - name: environmentLower
+    type: string
+  - name: artifactName
+    type: string
+    default: python-package
+
+jobs:
+  - deployment: Deploy${{ parameters.environment }}
+    displayName: Deploy library to ${{ parameters.environment }}
+    environment: ${{ parameters.environment }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - download: current
+              displayName: Download promoted library artifact
+              artifact: ${{ parameters.artifactName }}
+
+            - task: UsePythonVersion@0
+              displayName: Use Python 3.11
+              inputs:
+                versionSpec: "3.11"
+                addToPath: true
+
+            - script: |
+                set -euo pipefail
+                ARTIFACT_DIR="$(Pipeline.Workspace)/${{ parameters.artifactName }}"
+                python3 "$ARTIFACT_DIR/scripts/deploy.py" \
+                  --env "${{ parameters.environment }}" \
+                  --artifact-dir "$ARTIFACT_DIR" \
+                  --config "$ARTIFACT_DIR/config/environments/${{ parameters.environmentLower }}.yaml" \
+                  --release-dir "$(Pipeline.Workspace)/release/${{ parameters.environment }}"
+                echo "##vso[task.uploadsummary]$ARTIFACT_DIR/config/environments/${{ parameters.environmentLower }}.yaml"
+              displayName: Simulate ${{ parameters.environment }} release
+              env:
+                BUILD_BUILDID: $(Build.BuildId)
+                BUILD_SOURCEBRANCH: $(Build.SourceBranch)
+                BUILD_SOURCEVERSION: $(Build.SourceVersion)

@@ -1,0 +1,14 @@
+.tmp-*/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.pyc
+dist/
+output/
+spark-warehouse/
+metastore_db/
+.DS_Store
+.idea/
+.vscode/

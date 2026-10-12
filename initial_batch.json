@@ -1,0 +1,101 @@
+[
+  {
+    "sdk_version": "2.0.0",
+    "event_timestamp": 1787721610000,
+    "event_id": "a10f3c82-1234-4a21-9876-0192837465ab",
+    "event_name": "search",
+    "device": [
+      {
+        "platform": "android",
+        "device_id": "dev_and_99999"
+      },
+      {
+        "platform": "windows",
+        "device_id": "dev_win_88888"
+      }
+    ],
+    "platform": "android",
+    "batch_ordering_id": null,
+    "customer_id": "93874923480"
+  },
+  {
+    "sdk_version": "2.0.0",
+    "event_timestamp": 1787721625000,
+    "event_id": "b21e4d93-2345-5b32-8765-1203948576bc",
+    "event_name": "select_item",
+    "device": [
+      {
+        "platform": "mac",
+        "device_id": "dev_mac_33102"
+      },
+      {
+        "platform": "android",
+        "device_id": "dev_and_55412"
+      }
+    ],
+    "platform": "mac",
+    "batch_ordering_id": null,
+    "customer_id": "10485729301"
+  },
+  {
+    "sdk_version": "2.0.0",
+    "event_timestamp": 1787721640000,
+    "event_id": "c32f5ea4-3456-6c43-7654-2314059687cd",
+    "event_name": "begin_checkout",
+    "device": [
+      {
+        "platform": "windows",
+        "device_id": "dev_win_11223"
+      },
+      {
+        "platform": "mac",
+        "device_id": "dev_mac_44556"
+      },
+      {
+        "platform": "android",
+        "device_id": "dev_and_77889"
+      }
+    ],
+    "platform": "windows",
+    "batch_ordering_id": null,
+    "customer_id": "58392019485"
+  },
+  {
+    "sdk_version": "2.0.0",
+    "event_timestamp": 1787721655000,
+    "event_id": "d43a6fb5-4567-7d54-6543-3425160798de",
+    "event_name": "purchase",
+    "device": [
+      {
+        "platform": "android",
+        "device_id": "dev_and_66432"
+      },
+      {
+        "platform": "windows",
+        "device_id": "dev_win_99102"
+      }
+    ],
+    "platform": "android",
+    "batch_ordering_id": null,
+    "customer_id": "72910482039"
+  },
+  {
+    "sdk_version": "2.0.0",
+    "event_timestamp": 1787721670000,
+    "event_id": "e54b7ac6-5678-8e65-5432-4536271809ef",
+    "event_name": "log_out",
+    "device": [
+      {
+        "platform": "mac",
+        "device_id": "dev_mac_88190"
+      },
+      {
+        "platform": "windows",
+        "device_id": "dev_win_77341"
+      }
+    ],
+    "platform": "mac",
+    "batch_ordering_id": null,
+    "customer_id": "31092847501"
+  }
+]

@@ -1,0 +1,33 @@
+parameters:
+  - name: installJava
+    type: boolean
+    default: false
+  - name: poetryVersion
+    type: string
+    default: "1.8.5"
+  - name: pythonVersion
+    type: string
+    default: "3.11"
+
+steps:
+  - task: UsePythonVersion@0
+    displayName: Use Python ${{ parameters.pythonVersion }}
+    inputs:
+      versionSpec: ${{ parameters.pythonVersion }}
+      addToPath: true
+
+  - ${{ if eq(parameters.installJava, true) }}:
+      - task: JavaToolInstaller@0
+        displayName: Use Java 17
+        inputs:
+          versionSpec: "17"
+          jdkArchitectureOption: x64
+          jdkSourceOption: PreInstalled
+
+  - script: |
+      set -euo pipefail
+      python -m pip install --upgrade pip
+      pip install "poetry==${{ parameters.poetryVersion }}"
+      poetry --version
+      poetry config virtualenvs.in-project true
+    displayName: Install Poetry

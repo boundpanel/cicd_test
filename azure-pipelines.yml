@@ -1,0 +1,123 @@
+# DataOps CI/CD for the scrm-etl library.
+# Stages: Test -> Package -> Deploy DEV -> Deploy PROD
+# The same wheel is promoted; environments are not rebuilt.
+
+trigger:
+  branches:
+    include:
+      - main
+      - master
+
+pr:
+  branches:
+    include:
+      - main
+      - master
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  pythonVersion: "3.11"
+  poetryVersion: "1.8.5"
+  artifactName: python-package
+  packageVersion: "0.1.$(Build.BuildId)"
+  SPARK_LOCAL_IP: 127.0.0.1
+  SPARK_UI_ENABLED: "false"
+  SPARK_DRIVER_MEMORY: 2g
+  SPARK_MASTER: local[*]
+
+stages:
+  - stage: Test
+    displayName: Test Execution
+    jobs:
+      - job: QualityGate
+        displayName: Lint and pytest
+        steps:
+          - template: pipelines/templates/setup-python.yml
+            parameters:
+              installJava: true
+              poetryVersion: $(poetryVersion)
+              pythonVersion: $(pythonVersion)
+
+          - script: |
+              set -euo pipefail
+              poetry install --no-ansi --with dev
+            displayName: Install project and test dependencies
+
+          - script: |
+              set -euo pipefail
+              poetry run ruff check src tests scripts
+            displayName: Lint
+
+          - script: |
+              set -euo pipefail
+              poetry run pytest tests --junitxml="$(Build.SourcesDirectory)/junit.xml"
+            displayName: Run unit and integration tests
+
+          - task: PublishTestResults@2
+            displayName: Publish pytest results
+            condition: always()
+            inputs:
+              testResultsFormat: JUnit
+              testResultsFiles: junit.xml
+              mergeTestResults: true
+              testRunTitle: scrm-etl pytest
+              failTaskOnFailedTests: true
+
+  - stage: Package
+    displayName: Package / Build
+    dependsOn: Test
+    jobs:
+      - job: BuildLibrary
+        displayName: Build Poetry wheel
+        steps:
+          - template: pipelines/templates/setup-python.yml
+            parameters:
+              poetryVersion: $(poetryVersion)
+              pythonVersion: $(pythonVersion)
+
+          - script: |
+              set -euo pipefail
+              poetry version "$(packageVersion)"
+              poetry build
+              ls -l dist
+            displayName: Version and build library artifact
+
+          - script: |
+              set -euo pipefail
+              STAGING="$(Build.ArtifactStagingDirectory)"
+              mkdir -p "$STAGING/dist" "$STAGING/config/environments" "$STAGING/scripts"
+              cp dist/*.whl dist/*.tar.gz "$STAGING/dist/"
+              cp config/environments/*.yaml "$STAGING/config/environments/"
+              cp scripts/deploy.py "$STAGING/scripts/"
+            displayName: Stage immutable release bundle
+
+          - task: PublishPipelineArtifact@1
+            displayName: Publish python-package artifact
+            inputs:
+              targetPath: $(Build.ArtifactStagingDirectory)
+              artifact: $(artifactName)
+              publishLocation: pipeline
+
+  - stage: DeployDEV
+    displayName: Deploy DEV
+    dependsOn: Package
+    condition: succeeded()
+    jobs:
+      - template: pipelines/templates/deploy.yml
+        parameters:
+          environment: DEV
+          environmentLower: dev
+          artifactName: python-package
+
+  - stage: DeployPROD
+    displayName: Deploy PROD
+    dependsOn: DeployDEV
+    condition: succeeded()
+    jobs:
+      - template: pipelines/templates/deploy.yml
+        parameters:
+          environment: PROD
+          environmentLower: prod
+          artifactName: python-package

@@ -1,0 +1,10 @@
+environment: PROD
+storage_account: scrmdlsprod
+container: bronze
+output_path: abfss://bronze@scrmdlsprod.dfs.core.windows.net/events
+catalog: scrm_prod
+schema: events
+table: event_flat
+mode: merge
+spark_master: yarn
+retention_days: 90

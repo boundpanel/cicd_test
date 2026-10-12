@@ -1,0 +1,21 @@
+services:
+  etl:
+    build: .
+    image: scrm-etl:latest
+    working_dir: /app
+    volumes:
+      - ./initial_batch.json:/data/initial_batch.json:ro
+      - ./second_batch.json:/data/second_batch.json:ro
+      - ./output:/output
+      - ./src:/app/src
+      - ./tests:/app/tests
+    environment:
+      SPARK_LOCAL_IP: 127.0.0.1
+      SPARK_MASTER: local[*]
+      SPARK_UI_ENABLED: "false"
+      SPARK_DRIVER_MEMORY: 1g
+    command:
+      - --input
+      - /data/initial_batch.json
+      - --output
+      - /output/events

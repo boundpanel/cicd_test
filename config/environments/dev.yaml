@@ -1,0 +1,10 @@
+environment: DEV
+storage_account: scrmdlsdev
+container: bronze
+output_path: abfss://bronze@scrmdlsdev.dfs.core.windows.net/events
+catalog: scrm_dev
+schema: events
+table: event_flat
+mode: merge
+spark_master: local[*]
+retention_days: 7

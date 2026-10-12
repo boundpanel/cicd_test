@@ -1,0 +1,63 @@
+[
+  {
+    "sdk_version": "2.0.0",
+    "event_timestamp": 1787721521591,
+    "event_id": "cb692f71-ea67-465d-89a3-31a8f4cd505a",
+    "event_name": "log_in",
+    "device": [
+      {
+        "platform": "android",
+        "device_id": "dev_and_98231"
+      },
+      {
+        "platform": "mac",
+        "device_id": "dev_mac_44120"
+      },
+      {
+        "platform": "windows",
+        "device_id": "dev_win_11092"
+      }
+    ],
+    "platform": "android",
+    "batch_ordering_id": null,
+    "customer_id": "93874923480"
+  },
+  {
+    "sdk_version": "2.0.0",
+    "event_timestamp": 1787721535000,
+    "event_id": "7a3f81e2-4bc1-432a-91d2-05e83911bf04",
+    "event_name": "view_item",
+    "device": [
+      {
+        "platform": "android",
+        "device_id": "dev_and_98231"
+      },
+      {
+        "platform": "mac",
+        "device_id": "dev_mac_44120"
+      }
+    ],
+    "platform": "android",
+    "batch_ordering_id": null,
+    "customer_id": "93874923480"
+  },
+  {
+    "sdk_version": "2.0.0",
+    "event_timestamp": 1787721590000,
+    "event_id": "e294b011-81df-4b95-a431-89c56f2a281e",
+    "event_name": "add_to_cart",
+    "device": [
+      {
+        "platform": "mac",
+        "device_id": "dev_mac_44120"
+      },
+      {
+        "platform": "windows",
+        "device_id": "dev_win_11092"
+      }
+    ],
+    "platform": "android",
+    "batch_ordering_id": null,
+    "customer_id": "93874923480"
+  }
+]
