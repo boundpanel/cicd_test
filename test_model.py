@@ -1,57 +1,32 @@
-"""Active-client risk mart."""
-
 from __future__ import annotations
 
-from pyspark.sql import DataFrame
-from pyspark.sql import functions as F
+from datetime import datetime
 
-from models.base import TableModel
+import pytest
+
+from models import RiskDataPipeline
 
 
-class RiskDataPipeline(TableModel):
-    """Filter active clients, flag high risk, and project mart columns.
+def test_threshold_must_be_unit_interval() -> None:
+    with pytest.raises(ValueError, match="risk_threshold"):
+        RiskDataPipeline(risk_threshold=1.5)
 
-    Column names are the table contract. Keep them here so notebooks and
-    jobs do not scatter string literals.
 
-    Example
-    -------
-    >>> mart = RiskDataPipeline(risk_threshold=0.75)
-    >>> result = mart(source_df)
-    """
+def test_pipeline_is_callable(spark) -> None:
+    mart = RiskDataPipeline(risk_threshold=0.75)
+    rows = [
+        ("c1", "ACTIVE", 0.9, datetime(2026, 1, 1)),
+        ("c2", "ACTIVE", 0.2, datetime(2026, 1, 1)),
+        ("c3", "INACTIVE", 0.99, datetime(2026, 1, 1)),
+    ]
+    source = spark.createDataFrame(
+        rows,
+        schema=["client_id", "status", "score", "updated_at"],
+    )
 
-    class Col:
-        CLIENT_ID = "client_id"
-        STATUS = "status"
-        SCORE = "score"
-        IS_HIGH_RISK = "is_high_risk"
-        UPDATED_AT = "updated_at"
-        ACTIVE_STATUS = "ACTIVE"
+    result = mart(source).orderBy("client_id").collect()
 
-    def __init__(self, risk_threshold: float = 0.7) -> None:
-        if not 0.0 <= risk_threshold <= 1.0:
-            raise ValueError("risk_threshold must be between 0 and 1 inclusive")
-        self.risk_threshold = float(risk_threshold)
-
-    @staticmethod
-    def _filter_active_clients(df: DataFrame) -> DataFrame:
-        return df.filter(F.col(RiskDataPipeline.Col.STATUS) == RiskDataPipeline.Col.ACTIVE_STATUS)
-
-    def _flag_high_risk(self, df: DataFrame) -> DataFrame:
-        """Bound method: ``transform`` receives ``self`` without a closure."""
-        return df.withColumn(
-            self.Col.IS_HIGH_RISK,
-            F.when(F.col(self.Col.SCORE) > self.risk_threshold, True).otherwise(False),
-        )
-
-    @staticmethod
-    def _select_columns(df: DataFrame) -> DataFrame:
-        col = RiskDataPipeline.Col
-        return df.select(col.CLIENT_ID, col.SCORE, col.IS_HIGH_RISK, col.UPDATED_AT)
-
-    def run(self, df: DataFrame) -> DataFrame:
-        return (
-            df.transform(self._filter_active_clients)
-            .transform(self._flag_high_risk)
-            .transform(self._select_columns)
-        )
+    assert [row.client_id for row in result] == ["c1", "c2"]
+    assert result[0].is_high_risk is True
+    assert result[1].is_high_risk is False
+    assert set(result[0].asDict()) == {"client_id", "score", "is_high_risk", "updated_at"}
